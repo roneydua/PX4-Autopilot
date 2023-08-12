@@ -75,3 +75,6 @@ add_subdirectory(version EXCLUDE_FROM_ALL)
 add_subdirectory(weather_vane EXCLUDE_FROM_ALL)
 add_subdirectory(wind_estimator EXCLUDE_FROM_ALL)
 add_subdirectory(world_magnetic_model EXCLUDE_FROM_ALL)
+# Nonlinear control ADD
+add_subdirectory(GRUPO_QUAT)
+add_subdirectory(DRONE)
