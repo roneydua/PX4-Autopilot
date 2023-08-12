@@ -1,0 +1,5 @@
+menuconfig MODULES_MC_SDRE_CONTROL
+	bool "mc_sdre_control"
+	default n
+	---help---
+		Enable support for mc_sdre_control
