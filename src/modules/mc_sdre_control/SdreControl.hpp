@@ -28,13 +28,13 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
+ * @file SdreControl.hpp
+ * @author roneydua (roneyddasilva@gmail.com)
+ * @brief A cascaded attitude controller.
+ * @version 1
+ * @date 2023-08-12 06:30
  *
  ****************************************************************************/
-/**
- * @file SdreControl.hpp
- *
- * A cascaded attitude controller.
- */
 
 #pragma once
 // #include <uORB/uORB.h>
@@ -56,6 +56,7 @@
 // #include <lib/SDRE/Sdre.h>
 #include <lib/GRUPO_QUAT/GRUPO_QUAT.h>
 #include <lib/DRONE/Drone.h>
+#include <lib/SDRE/Sdre.h>
 using namespace time_literals;
 using namespace ekf;
 // extern "C" __EXPORT int sdre_control_main(int argc, char *argv[]);
@@ -101,7 +102,16 @@ private:
                     (ParamInt<px4::params::SYS_AUTOCONFIG>)
                         _param_sys_autoconfig /**< another parameter */
   )
+
+  /**
+   * @brief Updates the states of plants to calculate gains as SDRE control.
+   */
   void update_states();
+
+  /**
+   * @brief Update setpoint states of SDRE control class.
+   *
+   */
   void update_setpoint_states();
 
   // Subscriptions of body states
@@ -116,7 +126,53 @@ private:
 
   uORB::SubscriptionInterval _parameter_update_sub{ORB_ID(parameter_update),
                                                    1_s};
-  // Structs
+  // variables of control
 
-  //   vehicle_
+
+
+
+  float gravidade = 9.80f;
+  uint8_t index_alt = 1;
+  Drone *drone;
+  Sdre *sdre;
+  /*! Referência de velocidade translacional */
+  Eigen::Vector3f r = Eigen::Vector3f::Zero();
+  /*! Quaternion alvo de atitude */
+  Eigen::Matrix<float, 4, 2> qa = Eigen::Matrix<float, 4, 2>::Zero(4, 2);
+  /*! Quaternio de erro de atitude*/
+  Eigen::Vector4f qe{1, 0, 0, 0};
+  /*! Velocidade angular alvo */
+  Eigen::Vector3f wa = Eigen::Vector3f::Zero();
+  /*! Ponteiros de velocidade angular */
+  /*! Psi alvo */
+  float psi = 0.0f;
+  /*! Velocidade Psi alvo */
+  float diffPsi = 0.0f;
+  Eigen::Matrix3f Lt = Eigen::Matrix3f::Zero();
+
+  /*! Matriz de ponderação do main_control rotacional. */
+  Eigen::MatrixXf Rr =
+      (Eigen::Vector3f() << 1e1, 1e1, 1e1).finished().asDiagonal();
+  /*! Matriz de ponderação do estado rotacional. */
+  Eigen::MatrixXf Qr = (Eigen::VectorXf(6) << 1e1, 1e1, 1e1, 1e1, 1e1, 1e1)
+                           .finished()
+                           .asDiagonal();
+  /* Contoles */
+  /*! Vetor de main_control da dinâmica translacional */
+  Eigen::Vector3f ut = Eigen::Vector3f::Zero();
+  /*! Vetor de tração específica e momentos no corpo.
+    @note que a tração já esta considerando a massa.
+   */
+  Eigen::Vector4f u = Eigen::Vector4f::Zero();
+
+  float oldPsi = 0;
+
+  void computeTranslationalControl();
+  void computeRotationalControl();
+  void computeRotationalTarget();
+  void virtualCommandToMotorCommand();
+  void virtualCommandToMotorRpm();
+  void controlLoop();
+  bool negative_q0 = false;
+  float TSum = 10.0f;
 };

@@ -40,5 +40,6 @@ px4_add_module(
 	DEPENDS
 		DRONE
 		GRUPO_QUAT
+		SDRE
 	)
 

@@ -1,3 +1,5 @@
+
+
 /****************************************************************************
  *
  *   Copyright (c) 2018 PX4 Development Team. All rights reserved.
@@ -29,6 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
+ * @file SdreControl.cpp
+ * @author roneydua (roneyddasilva@gmail.com)
+ * @brief This module calculates the moments of inertia with the SDRE control technique. For linear algebra calculations the Eigen library is used. To install it, you can use the script available at https://github.com/roneydua/comandosNovaInstalacao/blob/master/install_eigen.sh
+ * @version 1
+ * @date 2023-08-12 06:24
  ****************************************************************************/
 
 #include "SdreControl.hpp"
@@ -127,9 +134,12 @@ SdreControl *SdreControl::instantiate(int argc, char *argv[]) {
 SdreControl::SdreControl() : ModuleParams(nullptr) {
   _drone = new Drone(0.1f);
   PRINT_MAT(_drone->matBR);
+
 }
 
+/** @copydoc update_states */
 void SdreControl::update_states() {
+
   vehicle_attitude_s _vehicle_attitude{};
   vehicle_angular_velocity_s _vehicle_angular_velocity{};
 
@@ -141,6 +151,7 @@ void SdreControl::update_states() {
   _drone->q = Eigen::Map<Eigen::MatrixXf>(_vehicle_attitude.q, 4, 1);
   _drone->w = Eigen::Map<Eigen::MatrixXf>(_vehicle_angular_velocity.xyz, 3, 1);
 }
+/** @copydoc update_setpoint_states */
 void SdreControl::update_setpoint_states() {
   // vehicle_attitude_setpoint_s _vehicle_attitude_setpoint{};
   // vehicle_rates_setpoint_s _vehicle_rates_setpoint{};
@@ -195,7 +206,6 @@ void SdreControl::run() {
 
     parameters_update();
   }
-
   orb_unsubscribe(sensor_combined_sub);
 }
 
