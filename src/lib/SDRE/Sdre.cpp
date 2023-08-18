@@ -21,12 +21,13 @@ Sdre::Sdre(Eigen::MatrixXf &A, Eigen::MatrixXf &B, Eigen::MatrixXf &_Q,
   phi = &A;
   gamma = &B;
   E = B * _R.inverse() * B.transpose();
-
+  // large number of iterations for the first iteration
+  ricObj->dareInteration(1e-5, 10000);
 }
 Sdre::~Sdre() {}
 /**
- * Atualiza a solução de Riccati e o controle ótimo L.
- * @return true para sucesso ou false para fracasso.
+ * Updates the Riccati solution and the optimal control L.
+ * @return True for success or false to failure.
  */
 bool Sdre::updateControl() {
   // Check if the algorithm converges with the desired iterations and tolerance number.
