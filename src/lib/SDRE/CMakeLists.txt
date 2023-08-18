@@ -33,5 +33,6 @@
 px4_add_library(SDRE
 	Sdre.cpp
 	Sdre.h
-
+	RICCATI/Riccati.cpp
+	RICCATI/Riccati.h
 )

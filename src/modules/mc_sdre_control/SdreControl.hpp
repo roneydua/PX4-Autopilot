@@ -86,7 +86,7 @@ public:
   int print_status() override;
 
   void print_hello(int n);
-  Drone *_drone;
+
 
 private:
   // Sdre _sdre; // instance of sdre control loop.
@@ -133,8 +133,6 @@ private:
 
   float gravidade = 9.80f;
   uint8_t index_alt = 1;
-  Drone *drone;
-  Sdre *sdre;
   /*! Referência de velocidade translacional */
   Eigen::Vector3f r = Eigen::Vector3f::Zero();
   /*! Quaternion alvo de atitude */
@@ -166,6 +164,9 @@ private:
   Eigen::Vector4f u = Eigen::Vector4f::Zero();
 
   float oldPsi = 0;
+
+  Drone *drone;
+  Sdre *sdre;
 
   void computeTranslationalControl();
   void computeRotationalControl();

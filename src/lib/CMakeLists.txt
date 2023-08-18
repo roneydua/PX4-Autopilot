@@ -78,5 +78,5 @@ add_subdirectory(world_magnetic_model EXCLUDE_FROM_ALL)
 # Nonlinear control ADD
 add_subdirectory(GRUPO_QUAT)
 add_subdirectory(DRONE)
-add_subdirectory(RICCATI)
+add_subdirectory(SDRE/RICCATI)
 add_subdirectory(SDRE)

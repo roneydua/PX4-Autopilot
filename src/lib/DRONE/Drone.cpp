@@ -12,7 +12,6 @@
 
 Drone::Drone(float _dt) {
 
-  constructJ();
   dt = _dt;
   half_dt = 0.5f * dt;
   // matAT = (1.0f - dt * dx / massa) * Eigen::Matrix3f::Identity();
@@ -25,30 +24,22 @@ Drone::Drone(float _dt) {
   matBR.block<3, 3>(3, 0) = dt * inverseMatrizInercia;
 }
 /**
- * Atualiza as matrizes dependentes do estado.
+ * @brief Updates state-dependent matrices.
+ *
+ * @param negative_q0
  */
 void Drone::updateStateMatrices(bool &negative_q0) {
 
   float _q0 = 0.0f;
-// HACK
-#if 0
-  if (negative_q0) {
-    _q0 = -abs(q(0));
-  } else {
-    _q0 = abs(q(0));
-    // _q0 = q(0);
-  }
-#endif
+  // HACK
   _q0 = q(0);
   if (abs(q(0)) > 0.01f) {
-    flagSDC = 1;
     matAR(0, 0) = 1.0f;
     matAR(1, 1) = 1.0f;
     matAR(2, 2) = 1.0f;
     matAR.topRightCorner(3, 3) =
         half_dt * (_q0 * Eigen::Matrix3f::Identity() + ekf::skew(q.tail(3)));
   } else {
-    flagSDC = 2;
     matAR(0, 0) = -half_dt * w(0) * q(1) + 1.0f;
     matAR(1, 1) = -half_dt * w(1) * q(2) + 1.0f;
     matAR(2, 2) = -half_dt * w(2) * q(3) + 1.0f;
@@ -63,29 +54,4 @@ void Drone::updateStateMatrices(bool &negative_q0) {
   matAR(3, 3) = 1.0f;
   matAR(4, 4) = 1.0f;
   matAR(5, 5) = 1.0f;
-}
-/// @brief
-void Drone::constructJ() {
-
-#ifndef MOTOR_MODEL_SIMPLE
-  /* Constantes de força*/
-  float kf1 = 1.2457e-7;
-  float kf2 = 1.4793e-7;
-  float kf3 = 1.4969e-7;
-  float kf4 = 1.3940e-7;
-  /* Constantes de momento*/
-  float km1 = 2.4656e-9;
-  float km2 = 3.1518e-9;
-  float km3 = 2.7691e-9;
-  float km4 = 3.1051e-9;
-
-  J << -kf1, -kf2, -kf3, -kf4, -L * kf1, 0, L * kf3, 0, 0, L * kf2, 0, -L * kf4,
-      km1, -km2, km3, -km4;
-#else
-  float kf = 1.469e-7;
-  float km = 3.1518e-9;
-  J << -kf, -kf, -kf, -kf, -L * kf, 0, L * kf, 0, 0, L * kf, 0, -L * kf, -km,
-      km, -km, km;
-#endif
-  JInverse = J.inverse();
 }

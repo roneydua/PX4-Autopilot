@@ -1,5 +1,3 @@
-
-
 /****************************************************************************
  *
  *   Copyright (c) 2018 PX4 Development Team. All rights reserved.
@@ -127,13 +125,14 @@ SdreControl *SdreControl::instantiate(int argc, char *argv[]) {
   if (instance == nullptr) {
     PX4_ERR("alloc failed");
   }
-
   return instance;
 }
 
 SdreControl::SdreControl() : ModuleParams(nullptr) {
-  _drone = new Drone(0.1f);
-  PRINT_MAT(_drone->matBR);
+  drone = new Drone(0.1f);
+  PRINT_MAT(drone->matBR);
+  sdre = new Sdre(drone->matAR, drone->matBR, Qr,Rr);
+  PRINT_MAT(sdre->L);
 
 }
 
@@ -148,8 +147,8 @@ void SdreControl::update_states() {
       &_vehicle_angular_velocity); // to get actual angula velocity
 
   // copy atual states to drone class
-  _drone->q = Eigen::Map<Eigen::MatrixXf>(_vehicle_attitude.q, 4, 1);
-  _drone->w = Eigen::Map<Eigen::MatrixXf>(_vehicle_angular_velocity.xyz, 3, 1);
+  drone->q = Eigen::Map<Eigen::MatrixXf>(_vehicle_attitude.q, 4, 1);
+  drone->w = Eigen::Map<Eigen::MatrixXf>(_vehicle_angular_velocity.xyz, 3, 1);
 }
 /** @copydoc update_setpoint_states */
 void SdreControl::update_setpoint_states() {
@@ -158,8 +157,8 @@ void SdreControl::update_setpoint_states() {
   // _vehicle_attitude_setpoint_sub.update(&_vehicle_attitude_setpoint);
   // _vehicle_rates_setpoint_sub.update(&_vehicle_attitude_setpoint);
 
-  // _drone-> = Eigen::Map<Eigen::MatrixXf>(_vehicle_attitude_setpoint.q_d, 4, 1);
-  // _drone->w = Eigen::Map<Eigen::MatrixXf>(_vehicle_angular_velocity.xyz, 3, 1);
+  // drone-> = Eigen::Map<Eigen::MatrixXf>(_vehicle_attitude_setpoint.q_d, 4, 1);
+  // drone->w = Eigen::Map<Eigen::MatrixXf>(_vehicle_angular_velocity.xyz, 3, 1);
 }
 
 void SdreControl::run() {
@@ -184,7 +183,7 @@ void SdreControl::run() {
     // publica
     // Eigen::Vector3f t{1,0,0,0};
     //
-    // PRINT_MAT(_drone->q);
+    // PRINT_MAT(drone->q);
     // wait for up to 1000ms for data
     int pret = px4_poll(fds, (sizeof(fds) / sizeof(fds[0])), 1000);
 

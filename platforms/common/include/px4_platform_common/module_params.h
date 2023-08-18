@@ -34,7 +34,8 @@
 /**
  * @file px4_module_params.h
  *
- * @class ModuleParams is a C++ base class for modules/classes using configuration parameters.
+ * @class ModuleParams is a C++ base class for modules/classes using
+ * configuration parameters.
  */
 
 #pragma once
@@ -43,60 +44,56 @@
 
 #include "param.h"
 
-class ModuleParams : public ListNode<ModuleParams *>
-{
+class ModuleParams : public ListNode<ModuleParams *> {
 public:
+  ModuleParams(ModuleParams *parent) { setParent(parent); }
 
-	ModuleParams(ModuleParams *parent)
-	{
-		setParent(parent);
-	}
+  /**
+   * @brief Sets the parent module. This is typically not required,
+   *         only in cases where the parent cannot be set via constructor.
+   */
+  void setParent(ModuleParams *parent) {
+    if (parent) {
+      parent->_children.add(this);
+    }
 
-	/**
-	 * @brief Sets the parent module. This is typically not required,
-	 *         only in cases where the parent cannot be set via constructor.
-	 */
-	void setParent(ModuleParams *parent)
-	{
-		if (parent) {
-			parent->_children.add(this);
-		}
+    _parent = parent;
+  }
 
-		_parent = parent;
-	}
+  virtual ~ModuleParams() {
+    if (_parent) {
+      _parent->_children.remove(this);
+    }
+  }
 
-	virtual ~ModuleParams()
-	{
-		if (_parent) { _parent->_children.remove(this); }
-	}
-
-	// Disallow copy construction and move assignment.
-	ModuleParams(const ModuleParams &) = delete;
-	ModuleParams &operator=(const ModuleParams &) = delete;
-	ModuleParams(ModuleParams &&) = delete;
-	ModuleParams &operator=(ModuleParams &&) = delete;
+  // Disallow copy construction and move assignment.
+  ModuleParams(const ModuleParams &) = delete;
+  ModuleParams &operator=(const ModuleParams &) = delete;
+  ModuleParams(ModuleParams &&) = delete;
+  ModuleParams &operator=(ModuleParams &&) = delete;
 
 protected:
-	/**
-	 * @brief Call this method whenever the module gets a parameter change notification.
-	 *        It will automatically call updateParams() for all children, which then call updateParamsImpl().
-	 */
-	virtual void updateParams()
-	{
-		for (const auto &child : _children) {
-			child->updateParams();
-		}
+  /**
+   * @brief Call this method whenever the module gets a parameter change
+   * notification. It will automatically call updateParams() for all children,
+   * which then call updateParamsImpl().
+   */
+  virtual void updateParams() {
+    for (const auto &child : _children) {
+      child->updateParams();
+    }
 
-		updateParamsImpl();
-	}
+    updateParamsImpl();
+  }
 
-	/**
-	 * @brief The implementation for this is generated with the macro DEFINE_PARAMETERS()
-	 */
-	virtual void updateParamsImpl() {}
+  /**
+   * @brief The implementation for this is generated with the macro
+   * DEFINE_PARAMETERS()
+   */
+  virtual void updateParamsImpl() {}
 
 private:
-	/** @list _children The module parameter list of inheriting classes. */
-	List<ModuleParams *> _children;
-	ModuleParams *_parent{nullptr};
+  /** @list _children The module parameter list of inheriting classes. */
+  List<ModuleParams *> _children;
+  ModuleParams *_parent{nullptr};
 };

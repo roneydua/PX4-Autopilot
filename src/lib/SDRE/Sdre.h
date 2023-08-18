@@ -8,7 +8,7 @@
  */
 #ifndef SDRE_H
 #define SDRE_H
-#include <lib/RICCATI/Riccati.h>
+#include <lib/SDRE/RICCATI/Riccati.h>
 #ifndef __XTENSA__
 #include <iostream>
 using namespace std;

@@ -7,6 +7,7 @@
  * Last modified time: 2021-08-02T14:13:06-03:00
  */
 #include "Riccati.h"
+#include <px4_platform_common/log.h>
 
 Riccati::Riccati(Eigen::MatrixXf &A, Eigen::MatrixXf &B, Eigen::MatrixXf &_Q,
                  Eigen::MatrixXf &_R) {
@@ -48,8 +49,8 @@ bool Riccati::dareInteration(const float &tolerance,
       return true;
     }
   }
-#ifndef __XTENSA__
-  printf("Falha. Erro %f\n", diff);
-#endif
+
+  // printf("Falha. Erro %f\n", diff);
+  PX4_WARN("The Riccati Library solver reached the maximum iterations value");
   return false;
 };

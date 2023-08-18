@@ -25,10 +25,6 @@ private:
   float half_dt;
 
 public:
-  /*! Mapa quadrado das rotações para u=[T, mx, my, mz]*/
-  Eigen::Matrix4f J;
-  /*! Mapa u=[T, mx, my, mz] para quadrado das rotações*/
-  Eigen::Matrix4f JInverse;
   /* Período do controle discreto*/
   float dt = 0.0f;
   /*! Coeficiente de Arrasto*/
@@ -49,8 +45,6 @@ public:
   vezes menos). Todavia deve-se ter cuidado com a limitação de operações desta
   classe.
   */
-  // const Eigen::DiagonalMatrix<float, 3> matrizInercia{10e-3f, 11e-3f,
-  // 18e-3f};
   const Eigen::DiagonalMatrix<float, 3> matrizInercia{10e-3f, 10e-3f, 18e-3f};
   /*! Inversa da matriz de momentos de inércia.
   @note São utilizadas as classes DiagonalMatrix para economia de memoria (n
@@ -78,33 +72,7 @@ public:
   Eigen::MatrixXf matAR = Eigen::MatrixXf::Identity(6, 6);
   /*! Matriz de controle rotacional discreta. */
   Eigen::MatrixXf matBR = Eigen::MatrixXf::Zero(6, 3);
-  /*! Matrix H conversão u to rotations */
-
-  // const Eigen::DiagonalMatrix<float, 4> H =
-  //     (Eigen::Vector4f(4) << 0.724048f, 0.724048f, 0.724048f, 0.724048f)
-  //         .finished()
-  //         .asDiagonal();
-
-  const Eigen::DiagonalMatrix<float, 4> H =
-      (Eigen::Vector4f(4) << 0.724048f, 0.73493f, 0.707656f, 0.727027f)
-          .finished()
-          .asDiagonal();
-
-  const Eigen::DiagonalMatrix<float, 4> HInverse =
-      (Eigen::Vector4f(4) << 1.0f / 0.724048f, 1.0f / 0.73493f,
-       1.0f / 0.707656f, 1.0f / 0.727027f)
-          .finished()
-          .asDiagonal();
-
-  /*! Vector h da conversão u to rotations */
-  const Eigen::Vector4f h{-3911.13f, -4180.05f, -3620.13f, -4279.45f};
-  // const Eigen::Vector4f h{-3911.13f, -3911.13f, -3911.13f, -3911.13f};
   void updateStateMatrices(bool &negative_q0);
-
-  void constructJ();
-  // Eigen::VectorXf continuosModel(Eigen::VectorXf x, Eigen::VectorXf u);
-  /*! This variable is used only to identify which parameterizations are being used.*/
-  int flagSDC = 0;
 };
 #endif
 /* DRONE_H */

@@ -6,6 +6,7 @@
  * Last modified by:   roney
  * Last modified time: 2021-08-03T17:16:37-03:00
  */
+
 #include "Sdre.h"
 Sdre::Sdre(Eigen::MatrixXf &A, Eigen::MatrixXf &B, Eigen::MatrixXf &_Q,
            Eigen::MatrixXf &_R) {
@@ -14,15 +15,13 @@ Sdre::Sdre(Eigen::MatrixXf &A, Eigen::MatrixXf &B, Eigen::MatrixXf &_Q,
   L = Eigen::MatrixXf::Identity(r, n);
   Q = &_Q;
   R = &_R;
-  /* instancia o Solver de Riccati */
+  //RICCATI instance or solver
   ricObj = new Riccati(A, B, *Q, *R);
-  /* Salvas os endereços das matrizes de estado e controle*/
+  //Saved the addresses of state and control matrices
   phi = &A;
   gamma = &B;
   E = B * _R.inverse() * B.transpose();
-#ifdef COMPUTE_MAT_REALIMENTACAO
-  G = Eigen::MatrixXf::Identity(n, n);
-#endif
+
 }
 Sdre::~Sdre() {}
 /**
@@ -30,31 +29,23 @@ Sdre::~Sdre() {}
  * @return true para sucesso ou false para fracasso.
  */
 bool Sdre::updateControl() {
-  // Verifica o se o algoritmo converge com o numero de iterações e tolerância
-  // desejado.
-  if ((*ricObj).dareInteration()) { // Obtem a matriz de Riccati.
-    // atualiza a matriz de ganho de Kalman
+  // Check if the algorithm converges with the desired iterations and tolerance number.
+  if ((*ricObj).dareInteration()) { // Obtains Riccati's matrix.
+    // Updates Kalman's gain matrix
     L = (*ricObj).Ls * (*ricObj).K * (*phi);
-#ifdef COMPUTE_MAT_REALIMENTACAO
-    G = ((*ricObj).I -
-         (*phi).transpose() *
-             ((*ricObj).I -
-              (*ricObj).K * ((*ricObj).I + E * (*ricObj).K).inverse() * E))
-            .inverse();
-#endif
+
     return true;
   } else {
-    // Retorna falso mantendo o ultimo ganho de Riccati.
+    // Returns false keeping Riccati's last gain.
     return false;
   }
 }
-/**
- * [Sdre::closeLoopEig description]
- */
 
+/**
+ * @brief Compute the close loop gains.
+ * @return Eigen::MatrixXcf
+ */
 Eigen::MatrixXcf Sdre::closeLoopEig() {
-  // Eigen::MatrixXf closeLoop =
-  //     *phi - *gamma * (*R).inverse() * (*gamma).transpose() * (*ricObj).K;
   Eigen::MatrixXf closeLoop = *phi - *gamma * L;
   Eigen::EigenSolver<Eigen::MatrixXf> Eigs(closeLoop);
   return Eigs.eigenvalues();
