@@ -176,4 +176,6 @@ private:
   void controlLoop();
   bool negative_q0 = false;
   float TSum = 10.0f;
+
+  hrt_abstime _last_run{0};
 };

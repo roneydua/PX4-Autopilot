@@ -31,7 +31,10 @@
  *
  * @file SdreControl.cpp
  * @author roneydua (roneyddasilva@gmail.com)
- * @brief This module calculates the moments of inertia with the SDRE control technique. For linear algebra calculations the Eigen library is used. To install it, you can use the script available at https://github.com/roneydua/comandosNovaInstalacao/blob/master/install_eigen.sh
+ * @brief This module calculates the moments of inertia with the SDRE control
+ *technique. For linear algebra calculations the Eigen library is used. To
+ *install it, you can use the script available at
+ *https://github.com/roneydua/comandosNovaInstalacao/blob/master/install_eigen.sh
  * @version 1
  * @date 2023-08-12 06:24
  ****************************************************************************/
@@ -129,11 +132,15 @@ SdreControl *SdreControl::instantiate(int argc, char *argv[]) {
 }
 
 SdreControl::SdreControl() : ModuleParams(nullptr) {
-  drone = new Drone(0.1f);
+  drone = new Drone(0.01f);
+  drone->updateStateMatrices();
+  sdre = new Sdre(drone->matAR, drone->matBR, Qr, Rr);
+  PRINT_MAT(drone->matAR);
   PRINT_MAT(drone->matBR);
-  sdre = new Sdre(drone->matAR, drone->matBR, Qr,Rr);
+  PRINT_MAT(Qr);
+  PRINT_MAT(Rr);
+  PRINT_MAT(sdre->ricObj->K);
   PRINT_MAT(sdre->L);
-
 }
 
 /** @copydoc update_states */
@@ -145,7 +152,10 @@ void SdreControl::update_states() {
   _vehicle_attitude_sub.update(&_vehicle_attitude); // to get actual quaternion
   _vehicle_angular_velocity_sub.update(
       &_vehicle_angular_velocity); // to get actual angula velocity
-
+  // Compute a elapsed time
+  const hrt_abstime now = angular_velocity.timestamp_sample;
+  const float dt = (now - _last_run) * 1e-6f;
+  _last_run = now;
   // copy atual states to drone class
   drone->q = Eigen::Map<Eigen::MatrixXf>(_vehicle_attitude.q, 4, 1);
   drone->w = Eigen::Map<Eigen::MatrixXf>(_vehicle_angular_velocity.xyz, 3, 1);
@@ -157,13 +167,12 @@ void SdreControl::update_setpoint_states() {
   // _vehicle_attitude_setpoint_sub.update(&_vehicle_attitude_setpoint);
   // _vehicle_rates_setpoint_sub.update(&_vehicle_attitude_setpoint);
 
-  // drone-> = Eigen::Map<Eigen::MatrixXf>(_vehicle_attitude_setpoint.q_d, 4, 1);
-  // drone->w = Eigen::Map<Eigen::MatrixXf>(_vehicle_angular_velocity.xyz, 3, 1);
+  // drone-> = Eigen::Map<Eigen::MatrixXf>(_vehicle_attitude_setpoint.q_d, 4,
+  // 1); drone->w = Eigen::Map<Eigen::MatrixXf>(_vehicle_angular_velocity.xyz,
+  // 3, 1);
 }
 
 void SdreControl::run() {
-
-  PX4_INFO("Dentro do run");
 
   // Example: run the loop synchronized to the sensor_combined topic publication
   int sensor_combined_sub = orb_subscribe(ORB_ID(sensor_combined));

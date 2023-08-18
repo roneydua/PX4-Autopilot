@@ -3,8 +3,6 @@
         "astyle.c.enable": true,
         "astyle.cpp.enable": true,
         "C_Cpp.autoAddFileAssociations": false,
-        // "C_Cpp.clang_format_fallbackStyle":".clang-format",
-        "clang-format.executable": "./../.clang-format",
         "C_Cpp.default.browse.limitSymbolsToIncludedHeaders": true,
         "C_Cpp.default.cppStandard": "c++14",
         "C_Cpp.default.cStandard": "c11",
