@@ -72,7 +72,7 @@ public:
   Eigen::MatrixXf matAR = Eigen::MatrixXf::Identity(6, 6);
   /*! Matriz de controle rotacional discreta. */
   Eigen::MatrixXf matBR = Eigen::MatrixXf::Zero(6, 3);
-  void updateStateMatrices(bool &negative_q0);
+  void updateStateMatrices(float dt);
 };
 #endif
 /* DRONE_H */

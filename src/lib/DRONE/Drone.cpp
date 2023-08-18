@@ -26,10 +26,10 @@ Drone::Drone(float _dt) {
 /**
  * @brief Updates state-dependent matrices.
  *
- * @param negative_q0
+ * @param dt elapsed time of loop
  */
-void Drone::updateStateMatrices(bool &negative_q0) {
-
+void Drone::updateStateMatrices(float dt) {
+  half_dt = 0.5*dt
   float _q0 = 0.0f;
   // HACK
   _q0 = q(0);
