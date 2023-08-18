@@ -30,7 +30,7 @@ Riccati::Riccati(Eigen::MatrixXf &A, Eigen::MatrixXf &B, Eigen::MatrixXf &_Q,
  * atingido.
  * @todo Testar a influencia em armazenar a matrix A.transpose().
  */
-bool Riccati::dareInteration(const float &tolerance,
+bool Riccati::dare_interation(const float &tolerance,
                              const uint16_t iter_max) { //
   /*! Diferença entre #K_new e #K */
   float diff = 0;

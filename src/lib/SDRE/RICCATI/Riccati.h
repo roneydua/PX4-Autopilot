@@ -38,7 +38,7 @@ public:
   Riccati(Eigen::MatrixXf &A, Eigen::MatrixXf &B, Eigen::MatrixXf &Q,
           Eigen::MatrixXf &R);
 
-  bool dareInteration(const float &tolerance = 1.0E-4,
+  bool dare_interation(const float &tolerance = 1.0E-4,
                       const uint16_t iter_max = 50);
 };
 #endif

@@ -168,12 +168,8 @@ private:
   Drone *drone;
   Sdre *sdre;
 
-  void computeTranslationalControl();
+  void compute_translational_control();
   void computeRotationalControl();
-  void computeRotationalTarget();
-  void virtualCommandToMotorCommand();
-  void virtualCommandToMotorRpm();
-  void controlLoop();
   bool negative_q0 = false;
   float TSum = 10.0f;
 

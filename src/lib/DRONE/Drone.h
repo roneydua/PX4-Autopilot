@@ -45,14 +45,14 @@ public:
   vezes menos). Todavia deve-se ter cuidado com a limitação de operações desta
   classe.
   */
-  const Eigen::DiagonalMatrix<float, 3> matrizInercia{10e-3f, 10e-3f, 18e-3f};
+  const Eigen::DiagonalMatrix<float, 3> matrix_inertia{10e-3f, 10e-3f, 18e-3f};
   /*! Inversa da matriz de momentos de inércia.
   @note São utilizadas as classes DiagonalMatrix para economia de memoria (n
   vezes menos). Todavia deve-se ter cuidado com a limitação de operações desta
   classe.
   */
-  const Eigen::DiagonalMatrix<float, 3> inverseMatrizInercia =
-      matrizInercia.inverse();
+  const Eigen::DiagonalMatrix<float, 3> inverse_matrix_inertia =
+      matrix_inertia.inverse();
   /*! Posicao translacional */
   Eigen::Vector3f p{0, 0, 0};
   /*! Velocidade translacional */
@@ -72,7 +72,7 @@ public:
   Eigen::MatrixXf matAR = Eigen::MatrixXf::Identity(6, 6);
   /*! Matriz de controle rotacional discreta. */
   Eigen::MatrixXf matBR = Eigen::MatrixXf::Zero(6, 3);
-  void updateStateMatrices(float dt);
+  void update_state_matrices(float dt);
 };
 #endif
 /* DRONE_H */

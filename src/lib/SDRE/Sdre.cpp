@@ -22,16 +22,16 @@ Sdre::Sdre(Eigen::MatrixXf &A, Eigen::MatrixXf &B, Eigen::MatrixXf &_Q,
   gamma = &B;
   E = B * _R.inverse() * B.transpose();
   // large number of iterations for the first iteration
-  ricObj->dareInteration(1e-5, 10000);
+  ricObj->dare_interation(1e-5, 10000);
 }
 Sdre::~Sdre() {}
 /**
  * Updates the Riccati solution and the optimal control L.
  * @return True for success or false to failure.
  */
-bool Sdre::updateControl() {
+bool Sdre::update_control() {
   // Check if the algorithm converges with the desired iterations and tolerance number.
-  if ((*ricObj).dareInteration()) { // Obtains Riccati's matrix.
+  if ((*ricObj).dare_interation()) { // Obtains Riccati's matrix.
     // Updates Kalman's gain matrix
     L = (*ricObj).Ls * (*ricObj).K * (*phi);
 
@@ -46,7 +46,7 @@ bool Sdre::updateControl() {
  * @brief Compute the close loop gains.
  * @return Eigen::MatrixXcf
  */
-Eigen::MatrixXcf Sdre::closeLoopEig() {
+Eigen::MatrixXcf Sdre::close_loop_eig() {
   Eigen::MatrixXf closeLoop = *phi - *gamma * L;
   Eigen::EigenSolver<Eigen::MatrixXf> Eigs(closeLoop);
   return Eigs.eigenvalues();

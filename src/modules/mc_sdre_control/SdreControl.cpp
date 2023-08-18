@@ -133,7 +133,7 @@ SdreControl *SdreControl::instantiate(int argc, char *argv[]) {
 
 SdreControl::SdreControl() : ModuleParams(nullptr) {
   drone = new Drone(0.01f);
-  drone->updateStateMatrices();
+  drone->update_state_matrices();
   sdre = new Sdre(drone->matAR, drone->matBR, Qr, Rr);
   PRINT_MAT(drone->matAR);
   PRINT_MAT(drone->matBR);

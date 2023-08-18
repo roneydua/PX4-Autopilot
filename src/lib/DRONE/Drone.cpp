@@ -21,14 +21,14 @@ Drone::Drone(float _dt) {
   matAT.topRightCorner(3, 3) = (1.0f + dt) * Eigen::Matrix3f::Identity();
 
   matBT.bottomRightCorner(3, 3) = dt * Eigen::Matrix3f::Identity();
-  matBR.block<3, 3>(3, 0) = dt * inverseMatrizInercia;
+  matBR.block<3, 3>(3, 0) = dt * inverse_matrix_inertia;
 }
 /**
  * @brief Updates state-dependent matrices.
  *
  * @param dt elapsed time of loop
  */
-void Drone::updateStateMatrices(float dt) {
+void Drone::update_state_matrices(float dt) {
   half_dt = 0.5*dt
   float _q0 = 0.0f;
   // HACK
@@ -50,7 +50,7 @@ void Drone::updateStateMatrices(float dt) {
     matAR(2, 5) = half_dt * (q(3) * q(3));
   }
   matAR.block<3, 3>(3, 3) =
-      -dt * inverseMatrizInercia * ekf::skew(w) * matrizInercia;
+      -dt * inverse_matrix_inertia * ekf::skew(w) * matrix_inertia;
   matAR(3, 3) = 1.0f;
   matAR(4, 4) = 1.0f;
   matAR(5, 5) = 1.0f;

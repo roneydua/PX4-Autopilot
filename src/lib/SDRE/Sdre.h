@@ -43,8 +43,8 @@ public:
   Sdre(Eigen::MatrixXf &A, Eigen::MatrixXf &B, Eigen::MatrixXf &Q,
        Eigen::MatrixXf &Rente);
   ~Sdre();
-  bool updateControl();
-  Eigen::MatrixXcf closeLoopEig();
+  bool update_control();
+  Eigen::MatrixXcf close_loop_eig();
 };
 #endif
 /* SDRE_H */
