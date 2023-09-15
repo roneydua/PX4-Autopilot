@@ -39,6 +39,8 @@
 #pragma once
 // #include <uORB/uORB.h>
 // #include <uORB/uORBTopics.h>
+// The matrix library it is used for thrust_setpoint.
+#include <lib/matrix/matrix/math.hpp>
 #include <px4_platform_common/module.h>
 #include <px4_platform_common/module_params.h>
 #include <uORB/SubscriptionInterval.hpp>
@@ -57,7 +59,7 @@
 
 #include <uORB/topics/vehicle_thrust_setpoint.h>
 #include <uORB/topics/vehicle_torque_setpoint.h>
-
+// This module uses the Eigen Library to calculate linear algebra
 #include "eigen3/Eigen/Dense"
 
 // #include <lib/SDRE/Sdre.h>
@@ -156,9 +158,9 @@ private:
 
   /*! Rotational control weighting matrix. */
   Eigen::MatrixXf Rr =
-      (Eigen::Vector3f() << 1e1, 1e1, 1e1).finished().asDiagonal();
+      (Eigen::Vector3f() << 1e2, 1e2, 1e2).finished().asDiagonal();
   /*! Rotational states weighting matrix. */
-  Eigen::MatrixXf Qr = (Eigen::VectorXf(6) << 1e1, 1e1, 1e1, 1e1, 1e1, 1e1)
+  Eigen::MatrixXf Qr = (Eigen::VectorXf(6) << 1e3, 1e3, 1e3, 1e3, 1e3, 1e3)
                            .finished()
                            .asDiagonal();
   /* Contoles */
@@ -178,4 +180,5 @@ private:
   float TSum = 10.0f;
 
   hrt_abstime _last_run{0};
+  matrix::Vector3f _thrust_setpoint{};
 };

@@ -14,7 +14,7 @@ Lista de atividades
 
 
 - Passos
-  1. Desativar os controles não pertinentes
+  1. Desativar os controles não pertinentes [rc.mc_app](ROMFS/px4fmu_common/init.d/rc.mc_apps)
   2. Colocar a bibliotecas auxiliares na pasta [lib](src/lib/)
    3. Criar os CMakeLists.txt dentre de cada pasta[Texto sobre assunto](https://dev.px4.io/v1.10_noredirect/en/apps/hello_sky.html)
          Um exemplo pode ser visto na pasta [DRONE](src/lib/DRONE/) colocar um [CMakeLists.txt](src/lib/DRONE/CMakeLists.txt)
@@ -25,4 +25,5 @@ Lista de atividades
 
 # Dúvidas e repostas
 Onde é calculado a empuxo?
-      No [Controle de posição](src/modules/mc_pos_control/MulticopterPositionControl.cpp#L635)
+      No [Controle de posição](src/modules/mc_pos_control/MulticopterPositionControl.cpp#L638)
+

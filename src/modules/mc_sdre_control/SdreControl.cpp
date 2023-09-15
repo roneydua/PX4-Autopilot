@@ -48,6 +48,9 @@
 #include <uORB/topics/parameter_update.h>
 #include <uORB/topics/sensor_combined.h>
 
+using namespace matrix;
+
+
 int SdreControl::print_status() {
   PX4_INFO("Running SDRE control");
   // TODO: print additional runtime information about the state of the module
@@ -146,7 +149,8 @@ SdreControl::SdreControl(bool vtol)
   PRINT_MAT(drone->matBR);
   PRINT_MAT(Qr);
   PRINT_MAT(Rr);
-  PRINT_MAT(sdre->ricObj->K);
+  PRINT_MAT(sdre->L);
+  sdre->update_control();
   PRINT_MAT(sdre->L);
 }
 
@@ -168,20 +172,33 @@ float SdreControl::update_states() {
   drone->q = Eigen::Map<Eigen::MatrixXf>(_vehicle_attitude.q, 4, 1);
   drone->w = Eigen::Map<Eigen::MatrixXf>(_vehicle_angular_velocity.xyz, 3, 1);
   drone->update_state_matrices(dt);
+  // Publish the thrust setpoint
+  // vehicle_thrust_setpoint.timestamp_sample = _vehicle_angular_velocity.timestamp_sample;
+  // vehicle_thrust_setpoint.timestamp = hrt_absolute_time();
+  // _vehicle_thrust_setpoint_pub.publish(vehicle_thrust_setpoint);
+
   return dt;
 }
+
 /** @copydoc update_setpoint_states */
 void SdreControl::update_setpoint_states() {
   vehicle_attitude_setpoint_s _vehicle_attitude_setpoint{};
   vehicle_rates_setpoint_s _vehicle_rates_setpoint{};
+  vehicle_thrust_setpoint_s vehicle_thrust_setpoint{};
   _vehicle_attitude_setpoint_sub.update(&_vehicle_attitude_setpoint);
-  _vehicle_rates_setpoint_sub.update(&_vehicle_attitude_setpoint);
+  _vehicle_rates_setpoint_sub.update(&_vehicle_rates_setpoint);
+
 
   q_sp = Eigen::Map<Eigen::MatrixXf>(_vehicle_attitude_setpoint.q_d, 4, 1);
   w_sp(0) = _vehicle_rates_setpoint.roll;
   w_sp(1) = _vehicle_rates_setpoint.pitch;
   w_sp(2) = _vehicle_rates_setpoint.yaw;
   // w_sp(0) = Eigen::Map<Eigen::MatrixXf>(_vehicle_rates_setpoint.xyz, 3, 1);
+
+  _thrust_setpoint = Vector3f(_vehicle_attitude_setpoint.thrust_body);
+  _thrust_setpoint.copyTo(vehicle_thrust_setpoint.xyz);
+  _vehicle_thrust_setpoint_pub.publish(vehicle_thrust_setpoint);
+
 }
 
 void SdreControl::run() {
@@ -191,6 +208,7 @@ void SdreControl::run() {
   px4_pollfd_struct_t fds[1];
   fds[0].fd = sensor_combined_sub;
   fds[0].events = POLLIN;
+
 
   // initialize parameters
   parameters_update(true);
@@ -203,7 +221,7 @@ void SdreControl::run() {
     update_setpoint_states();
     // Calculates Torques
     sdre->update_control();
-    // PRINT_MAT(sdre->L);
+
     Eigen::VectorXf _x(6);
     qe = (ekf::S_l(drone->q)).transpose() * q_sp;
     // _qI = ;
@@ -213,8 +231,11 @@ void SdreControl::run() {
       _x << -qe.tail(3), drone->w - w_sp;
     }
     u = -sdre->L * _x;
-    // public te moments
+    // public thrust and torques setpoints
     vehicle_torque_setpoint_s vehicle_torque_setpoint{};
+
+
+
     vehicle_torque_setpoint.xyz[0] = PX4_ISFINITE(u(0)) ? u(0) : 0.f;
     vehicle_torque_setpoint.xyz[1] = PX4_ISFINITE(u(1)) ? u(1) : 0.f;
     vehicle_torque_setpoint.xyz[2] = PX4_ISFINITE(u(2)) ? u(2) : 0.f;
