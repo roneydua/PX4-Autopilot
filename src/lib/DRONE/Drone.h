@@ -25,8 +25,6 @@ private:
   float half_dt;
 
 public:
-  /* Período do controle discreto*/
-  float dt = 0.0f;
   /*! Coeficiente de Arrasto*/
   float dx = 0.25f;
   /*! "Massa do quadrirrotor em kg. Sem os apoios e as proteções massa=1.135,

@@ -10,9 +10,9 @@
 
 #include "Drone.h"
 
-Drone::Drone(float _dt) {
+Drone::Drone(float dt) {
 
-  dt = _dt;
+
   half_dt = 0.5f * dt;
   // matAT = (1.0f - dt * dx / massa) * Eigen::Matrix3f::Identity();
   matAT.bottomRightCorner(3, 3) =
@@ -29,7 +29,7 @@ Drone::Drone(float _dt) {
  * @param dt elapsed time of loop
  */
 void Drone::update_state_matrices(float dt) {
-  half_dt = 0.5*dt
+  half_dt = 0.5f * dt;
   float _q0 = 0.0f;
   // HACK
   _q0 = q(0);
