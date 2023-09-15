@@ -185,6 +185,7 @@ void SdreControl::update_setpoint_states() {
   vehicle_attitude_setpoint_s _vehicle_attitude_setpoint{};
   vehicle_rates_setpoint_s _vehicle_rates_setpoint{};
   vehicle_thrust_setpoint_s vehicle_thrust_setpoint{};
+
   _vehicle_attitude_setpoint_sub.update(&_vehicle_attitude_setpoint);
   _vehicle_rates_setpoint_sub.update(&_vehicle_rates_setpoint);
 

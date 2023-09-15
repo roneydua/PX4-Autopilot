@@ -43,7 +43,7 @@ public:
   vezes menos). Todavia deve-se ter cuidado com a limitação de operações desta
   classe.
   */
-  const Eigen::DiagonalMatrix<float, 3> matrix_inertia{10e-3f, 10e-3f, 18e-3f};
+  const Eigen::DiagonalMatrix<float, 3> matrix_inertia{25e-3f, 25e-3f, 30e-3f};
   /*! Inversa da matriz de momentos de inércia.
   @note São utilizadas as classes DiagonalMatrix para economia de memoria (n
   vezes menos). Todavia deve-se ter cuidado com a limitação de operações desta

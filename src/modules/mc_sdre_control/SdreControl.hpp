@@ -158,12 +158,12 @@ private:
 
   /*! Rotational control weighting matrix. */
   Eigen::MatrixXf Rr =
-      (Eigen::Vector3f() << 1e2, 1e2, 1e2).finished().asDiagonal();
+      (Eigen::Vector3f() << 1e1, 1e1, 1e1).finished().asDiagonal();
   /*! Rotational states weighting matrix. */
   Eigen::MatrixXf Qr = (Eigen::VectorXf(6) << 1e3, 1e3, 1e3, 1e3, 1e3, 1e3)
                            .finished()
                            .asDiagonal();
-  /* Contoles */
+  /* Controles */
   /*! Vetor de tração específica e momentos no corpo.
     @note que a tração já esta considerando a massa.
    */
