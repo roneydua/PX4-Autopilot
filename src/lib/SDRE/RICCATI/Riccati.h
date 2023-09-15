@@ -39,7 +39,7 @@ public:
           Eigen::MatrixXf &R);
 
   bool dare_interation(const float &tolerance = 1.0E-4,
-                      const uint16_t iter_max = 50);
+                      const uint16_t iter_max = 1000);
 };
 #endif
 /* RICCATI_H */

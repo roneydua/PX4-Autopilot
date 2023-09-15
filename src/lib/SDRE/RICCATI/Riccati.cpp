@@ -51,6 +51,6 @@ bool Riccati::dare_interation(const float &tolerance,
   }
 
   // printf("Falha. Erro %f\n", diff);
-  PX4_WARN("The Riccati Library solver reached the maximum iterations value");
+  // PX4_WARN("The Riccati Library solver reached the maximum iterations value");
   return false;
 };
