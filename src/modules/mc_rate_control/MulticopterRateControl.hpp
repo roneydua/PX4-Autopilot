@@ -89,7 +89,7 @@ private:
   void parameters_updated();
 
   void updateActuatorControlsStatus(
-      const vehicle_torque_setpoint_s &vehicle_torque_setpoint, float dt);
+    const vehicle_torque_setpoint_s &vehicle_torque_setpoint, float dt);
 
   RateControl _rate_control; ///< class for rate control calculations
 
