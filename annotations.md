@@ -19,3 +19,10 @@ Lista de atividades
    3. Criar os CMakeLists.txt dentre de cada pasta[Texto sobre assunto](https://dev.px4.io/v1.10_noredirect/en/apps/hello_sky.html)
          Um exemplo pode ser visto na pasta [DRONE](src/lib/DRONE/) colocar um [CMakeLists.txt](src/lib/DRONE/CMakeLists.txt)
    4. Adicionar também uma linha no [CMakeLists.txt](src/lib/CMakeLists.txt) da pasta [lib](src/lib)
+
+
+
+
+# Dúvidas e repostas
+Onde é calculado a empuxo?
+      No [Controle de posição](src/modules/mc_pos_control/MulticopterPositionControl.cpp#L635)
