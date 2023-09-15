@@ -43,13 +43,20 @@
 #include <px4_platform_common/module_params.h>
 #include <uORB/SubscriptionInterval.hpp>
 #include <uORB/topics/parameter_update.h>
+
+#include <uORB/Publication.hpp>
+// #include <uORB/PublicationMulti.hpp>
 #include <uORB/Subscription.hpp>
+#include <uORB/topics/vehicle_angular_acceleration_setpoint.h>
+#include <uORB/topics/vehicle_angular_velocity.h>
 #include <uORB/topics/vehicle_attitude.h> // To use quaternions attitude
 #include <uORB/topics/vehicle_attitude_setpoint.h> // To use quaternions attitude setpoint
-#include <uORB/topics/vehicle_angular_velocity.h>
-#include <uORB/topics/vehicle_angular_acceleration_setpoint.h>
 #include <uORB/topics/vehicle_rates_setpoint.h>
 
+
+
+#include <uORB/topics/vehicle_thrust_setpoint.h>
+#include <uORB/topics/vehicle_torque_setpoint.h>
 
 #include "eigen3/Eigen/Dense"
 
@@ -63,7 +70,7 @@ using namespace ekf;
 
 class SdreControl : public ModuleBase<SdreControl>, public ModuleParams {
 public:
-  SdreControl();
+  SdreControl(bool vtol=false);
 
   virtual ~SdreControl() = default;
 
@@ -106,7 +113,7 @@ private:
   /**
    * @brief Updates the states of plants to calculate gains as SDRE control.
    */
-  void update_states();
+  float update_states();
 
   /**
    * @brief Update setpoint states of SDRE control class.
@@ -126,42 +133,39 @@ private:
 
   uORB::SubscriptionInterval _parameter_update_sub{ORB_ID(parameter_update),
                                                    1_s};
+  // Subscriptions of torque and thrust setpoints
+  uORB::Publication<vehicle_torque_setpoint_s> _vehicle_torque_setpoint_pub;
+  uORB::Publication<vehicle_thrust_setpoint_s> _vehicle_thrust_setpoint_pub;
+
   // variables of control
-
-
-
 
   float gravidade = 9.80f;
   uint8_t index_alt = 1;
-  /*! Referência de velocidade translacional */
-  Eigen::Vector3f r = Eigen::Vector3f::Zero();
-  /*! Quaternion alvo de atitude */
-  Eigen::Matrix<float, 4, 2> qa = Eigen::Matrix<float, 4, 2>::Zero(4, 2);
-  /*! Quaternio de erro de atitude*/
+  /*! Quaternion setpoint */
+  Eigen::Vector4f q_sp{1, 0, 0, 0};
+  /*! Quaternio de error*/
   Eigen::Vector4f qe{1, 0, 0, 0};
-  /*! Velocidade angular alvo */
-  Eigen::Vector3f wa = Eigen::Vector3f::Zero();
+  /*! angular rate setpoint */
+  Eigen::Vector3f w_sp = Eigen::Vector3f::Zero();
   /*! Ponteiros de velocidade angular */
   /*! Psi alvo */
-  float psi = 0.0f;
+  float psi_sp = 0.0f;
   /*! Velocidade Psi alvo */
   float diffPsi = 0.0f;
   Eigen::Matrix3f Lt = Eigen::Matrix3f::Zero();
 
-  /*! Matriz de ponderação do main_control rotacional. */
+  /*! Rotational control weighting matrix. */
   Eigen::MatrixXf Rr =
       (Eigen::Vector3f() << 1e1, 1e1, 1e1).finished().asDiagonal();
-  /*! Matriz de ponderação do estado rotacional. */
+  /*! Rotational states weighting matrix. */
   Eigen::MatrixXf Qr = (Eigen::VectorXf(6) << 1e1, 1e1, 1e1, 1e1, 1e1, 1e1)
                            .finished()
                            .asDiagonal();
   /* Contoles */
-  /*! Vetor de main_control da dinâmica translacional */
-  Eigen::Vector3f ut = Eigen::Vector3f::Zero();
   /*! Vetor de tração específica e momentos no corpo.
     @note que a tração já esta considerando a massa.
    */
-  Eigen::Vector4f u = Eigen::Vector4f::Zero();
+  Eigen::Vector3f u = Eigen::Vector3f::Zero();
 
   float oldPsi = 0;
 

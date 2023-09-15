@@ -131,9 +131,16 @@ SdreControl *SdreControl::instantiate(int argc, char *argv[]) {
   return instance;
 }
 
-SdreControl::SdreControl() : ModuleParams(nullptr) {
+SdreControl::SdreControl(bool vtol)
+    : ModuleParams(nullptr),
+      _vehicle_torque_setpoint_pub(
+          vtol ? ORB_ID(vehicle_torque_setpoint_virtual_mc)
+               : ORB_ID(vehicle_torque_setpoint)),
+      _vehicle_thrust_setpoint_pub(
+          vtol ? ORB_ID(vehicle_thrust_setpoint_virtual_mc)
+               : ORB_ID(vehicle_thrust_setpoint)) {
   drone = new Drone(0.01f);
-  drone->update_state_matrices();
+  drone->update_state_matrices(0.01f);
   sdre = new Sdre(drone->matAR, drone->matBR, Qr, Rr);
   PRINT_MAT(drone->matAR);
   PRINT_MAT(drone->matBR);
@@ -144,7 +151,7 @@ SdreControl::SdreControl() : ModuleParams(nullptr) {
 }
 
 /** @copydoc update_states */
-void SdreControl::update_states() {
+float SdreControl::update_states() {
 
   vehicle_attitude_s _vehicle_attitude{};
   vehicle_angular_velocity_s _vehicle_angular_velocity{};
@@ -152,24 +159,29 @@ void SdreControl::update_states() {
   _vehicle_attitude_sub.update(&_vehicle_attitude); // to get actual quaternion
   _vehicle_angular_velocity_sub.update(
       &_vehicle_angular_velocity); // to get actual angula velocity
-  // Compute a elapsed time
-  const hrt_abstime now = angular_velocity.timestamp_sample;
+  // Compute the elapsed time.
+  const hrt_abstime now = _vehicle_angular_velocity.timestamp_sample;
+  /*! elapsed time.*/
   const float dt = (now - _last_run) * 1e-6f;
   _last_run = now;
   // copy atual states to drone class
   drone->q = Eigen::Map<Eigen::MatrixXf>(_vehicle_attitude.q, 4, 1);
   drone->w = Eigen::Map<Eigen::MatrixXf>(_vehicle_angular_velocity.xyz, 3, 1);
+  drone->update_state_matrices(dt);
+  return dt;
 }
 /** @copydoc update_setpoint_states */
 void SdreControl::update_setpoint_states() {
-  // vehicle_attitude_setpoint_s _vehicle_attitude_setpoint{};
-  // vehicle_rates_setpoint_s _vehicle_rates_setpoint{};
-  // _vehicle_attitude_setpoint_sub.update(&_vehicle_attitude_setpoint);
-  // _vehicle_rates_setpoint_sub.update(&_vehicle_attitude_setpoint);
+  vehicle_attitude_setpoint_s _vehicle_attitude_setpoint{};
+  vehicle_rates_setpoint_s _vehicle_rates_setpoint{};
+  _vehicle_attitude_setpoint_sub.update(&_vehicle_attitude_setpoint);
+  _vehicle_rates_setpoint_sub.update(&_vehicle_attitude_setpoint);
 
-  // drone-> = Eigen::Map<Eigen::MatrixXf>(_vehicle_attitude_setpoint.q_d, 4,
-  // 1); drone->w = Eigen::Map<Eigen::MatrixXf>(_vehicle_angular_velocity.xyz,
-  // 3, 1);
+  q_sp = Eigen::Map<Eigen::MatrixXf>(_vehicle_attitude_setpoint.q_d, 4, 1);
+  w_sp(0) = _vehicle_rates_setpoint.roll;
+  w_sp(1) = _vehicle_rates_setpoint.pitch;
+  w_sp(2) = _vehicle_rates_setpoint.yaw;
+  // w_sp(0) = Eigen::Map<Eigen::MatrixXf>(_vehicle_rates_setpoint.xyz, 3, 1);
 }
 
 void SdreControl::run() {
@@ -185,14 +197,28 @@ void SdreControl::run() {
 
   while (!should_exit()) {
 
-    // calcula dt
-    // Atualiza os estados
-    // calcula  a solução Riccati
-    // Calcula os torques
-    // publica
-    // Eigen::Vector3f t{1,0,0,0};
-    //
-    // PRINT_MAT(drone->q);
+    // Updates the states
+    update_states();
+    // Updates the setpoint states
+    update_setpoint_states();
+    // Calculates Torques
+    sdre->update_control();
+    // PRINT_MAT(sdre->L);
+    Eigen::VectorXf _x(6);
+    qe = (ekf::S_l(drone->q)).transpose() * q_sp;
+    // _qI = ;
+    if (drone->q(0) < 0.0f) {
+      _x << qe.tail(3), drone->w - w_sp;
+    } else {
+      _x << -qe.tail(3), drone->w - w_sp;
+    }
+    u = -sdre->L * _x;
+    // public te moments
+    vehicle_torque_setpoint_s vehicle_torque_setpoint{};
+    vehicle_torque_setpoint.xyz[0] = PX4_ISFINITE(u(0)) ? u(0) : 0.f;
+    vehicle_torque_setpoint.xyz[1] = PX4_ISFINITE(u(1)) ? u(1) : 0.f;
+    vehicle_torque_setpoint.xyz[2] = PX4_ISFINITE(u(2)) ? u(2) : 0.f;
+    _vehicle_torque_setpoint_pub.publish(vehicle_torque_setpoint);
     // wait for up to 1000ms for data
     int pret = px4_poll(fds, (sizeof(fds) / sizeof(fds[0])), 1000);
 
@@ -253,6 +279,8 @@ void SdreControl::print_hello(int n) {
     PX4_INFO("ola \n");
   }
 }
+
+
 
 extern "C" __EXPORT int mc_sdre_control_main(int argc, char *argv[]) {
   return SdreControl::main(argc, argv);
