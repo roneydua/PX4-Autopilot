@@ -152,6 +152,12 @@ SdreControl::SdreControl(bool vtol)
   PRINT_MAT(sdre->L);
   sdre->update_control();
   PRINT_MAT(sdre->L);
+  // local struct
+  nonlinear_sdre_control_s _nonlinear_sdre_torques{};
+  _nonlinear_sdre_torques.torques_body[0] = 10;
+  _nonlinear_sdre_torques.torques_body[1] = 20;
+  _nonlinear_sdre_torques.torques_body[2] = 30;
+  _nonlinear_sdre_torques_pub.publish(_nonlinear_sdre_torques);
 }
 
 /** @copydoc update_states */
@@ -190,6 +196,7 @@ void SdreControl::update_setpoint_states() {
   _vehicle_rates_setpoint_sub.update(&_vehicle_rates_setpoint);
 
 
+  // _vehicle_attitude_setpoint.q_d is calculated by translation control (Loop externo)
   q_sp = Eigen::Map<Eigen::MatrixXf>(_vehicle_attitude_setpoint.q_d, 4, 1);
   w_sp(0) = _vehicle_rates_setpoint.roll;
   w_sp(1) = _vehicle_rates_setpoint.pitch;
@@ -199,6 +206,8 @@ void SdreControl::update_setpoint_states() {
   _thrust_setpoint = Vector3f(_vehicle_attitude_setpoint.thrust_body);
   _thrust_setpoint.copyTo(vehicle_thrust_setpoint.xyz);
   _vehicle_thrust_setpoint_pub.publish(vehicle_thrust_setpoint);
+
+
 
 }
 

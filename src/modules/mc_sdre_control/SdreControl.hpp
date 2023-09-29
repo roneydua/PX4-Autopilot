@@ -46,7 +46,7 @@
 #include <uORB/SubscriptionInterval.hpp>
 #include <uORB/topics/parameter_update.h>
 
-#include <uORB/Publication.hpp>
+#include <uORB/Publication.hpp> // needed for publish topics
 // #include <uORB/PublicationMulti.hpp>
 #include <uORB/Subscription.hpp>
 #include <uORB/topics/vehicle_angular_acceleration_setpoint.h>
@@ -66,6 +66,8 @@
 #include <lib/GRUPO_QUAT/GRUPO_QUAT.h>
 #include <lib/DRONE/Drone.h>
 #include <lib/SDRE/Sdre.h>
+// custom topic of controll
+#include <uORB/topics/nonlinear_sdre_control.h>
 using namespace time_literals;
 using namespace ekf;
 // extern "C" __EXPORT int sdre_control_main(int argc, char *argv[]);
@@ -139,7 +141,9 @@ private:
   uORB::Publication<vehicle_torque_setpoint_s> _vehicle_torque_setpoint_pub;
   uORB::Publication<vehicle_thrust_setpoint_s> _vehicle_thrust_setpoint_pub;
 
-  // variables of control
+  // Custom uORB messages
+  // uORB::Subscription _nonlinear_sdre_torques_sub{ORB_ID(nonlinear_sdre_torques)};
+  uORB::Publication<nonlinear_sdre_control_s> _nonlinear_sdre_torques_pub{ORB_ID(nonlinear_sdre_torques)};
 
   float gravidade = 9.80f;
   uint8_t index_alt = 1;
@@ -158,9 +162,9 @@ private:
 
   /*! Rotational control weighting matrix. */
   Eigen::MatrixXf Rr =
-      (Eigen::Vector3f() << 1e1, 1e1, 1e1).finished().asDiagonal();
+      (Eigen::Vector3f() << 1e4, 1e4, 1e4).finished().asDiagonal();
   /*! Rotational states weighting matrix. */
-  Eigen::MatrixXf Qr = (Eigen::VectorXf(6) << 1e3, 1e3, 1e3, 1e3, 1e3, 1e3)
+  Eigen::MatrixXf Qr = (Eigen::VectorXf(6) << 1e2, 1e2, 1e2, 1e1, 1e1, 1e1)
                            .finished()
                            .asDiagonal();
   /* Controles */
