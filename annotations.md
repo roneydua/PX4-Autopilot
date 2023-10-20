@@ -8,9 +8,9 @@ Lista de atividades
 - [x] incluir um módulo sdre (```mc_sdre_control```);
 - [x] compilar o módulo implementado
 - [x] verificar se o módulo está rodando
-- [ ] implementar uma função ```run()```  para o loop do nosso controle;
-- [ ] tirar arquivos que não são pertinentes ao nosso trabalho (como as funções de asa fixas);
-- [ ] fazer um "fork" com uma versão limpa;
+- [x] implementar uma função ```run()```  para o loop do nosso controle;
+- [ ] ~~tirar arquivos que não são pertinentes ao nosso trabalho (como as funções de asa fixas)~~;
+- [ ] ~~fazer um "fork" com uma versão limpa~~;
 
 
 - Passos
@@ -28,5 +28,14 @@ Onde é calculado a empuxo?
       No [Controle de posição](src/modules/mc_pos_control/MulticopterPositionControl.cpp#L638)
 
 ## Quais são as mínimas configurações que devem ser feitas para garantir o voo?
-  - [Vefica se há modificações de parametros](https://github.com/roneydua/PX4-Autopilot/blob/240849a68c635b33144f4b7ac29cbd734a396a59/src/modules/mc_rate_control/MulticopterRateControl.cpp#L115)
-  - [Verifica se a opção sair esta ativa.](https://github.com/roneydua/PX4-Autopilot/blob/main/src/modules/mc_rate_control/MulticopterRateControl.cpp#L112)
+### Multicopter attitude control
+- Durante o debug verifiquei que os módulos são executados em paralelo. Os pontos de parada ocorrem intercalados, em uma etapa ocorrem no controle de atitude enquanto que em outra ocorre no controle de taxa.
+### Multicopter rate control
+- Verifica se a opção sair esta ativa [`if (should_exit())`](https://github.com/roneydua/PX4-Autopilot/blob/ba12134e19f9819c0e77cb9b58bf5cfca7c75896/src/modules/mc_rate_control/MulticopterRateControl.cpp#L106)
+- Mede desempenho do módulo [`perf_begin(_loop_perf)`](https://github.com/roneydua/PX4-Autopilot/blob/ba12134e19f9819c0e77cb9b58bf5cfca7c75896/src/modules/mc_rate_control/MulticopterRateControl.cpp#L112)
+  - será que é obrigatório?
+- Verifica se há modificações de parametros [`if (_parameter_update_sub.updated())`](https://github.com/roneydua/PX4-Autopilot/blob/ba12134e19f9819c0e77cb9b58bf5cfca7c75896/src/modules/mc_rate_control/MulticopterRateControl.cpp#L115)
+- Aparentemente aqui que o controle define a velocidade do loop interno entrando quando há atualização do giroscópi. [`if (_vehicle_angular_velocity_sub.update(&angular_velocity))`](https://github.com/roneydua/PX4-Autopilot/blob/ba12134e19f9819c0e77cb9b58bf5cfca7c75896/src/modules/mc_rate_control/MulticopterRateControl.cpp#L127)
+- Verifica o módo de voo [`if(_vehicle_land_detected_sub.updated())`](https://github.com/roneydua/PX4-Autopilot/blob/ba12134e19f9819c0e77cb9b58bf5cfca7c75896/src/modules/mc_rate_control/MulticopterRateControl.cpp#L142)
+- Detecta se o quadrirrotor está pousado [`if (_vehicle_land_detected_sub.updated())`](https://github.com/roneydua/PX4-Autopilot/blob/ba12134e19f9819c0e77cb9b58bf5cfca7c75896/src/modules/mc_rate_control/MulticopterRateControl.cpp#L142)
+- Verifica se o controle está no modo controle manual. **Só entra se o controle de atituede está ativo.** [`if (_vehicle_control_mode.flag_control_manual_enabled &&!_vehicle_control_mode.flag_control_attitude_enabled)`](https://github.com/roneydua/PX4-Autopilot/blob/ba12134e19f9819c0e77cb9b58bf5cfca7c75896/src/modules/mc_rate_control/MulticopterRateControl.cpp#L156)
