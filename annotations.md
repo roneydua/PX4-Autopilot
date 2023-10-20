@@ -27,3 +27,6 @@ Lista de atividades
 Onde é calculado a empuxo?
       No [Controle de posição](src/modules/mc_pos_control/MulticopterPositionControl.cpp#L638)
 
+## Quais são as mínimas configurações que devem ser feitas para garantir o voo?
+  - [Vefica se há modificações de parametros](https://github.com/roneydua/PX4-Autopilot/blob/240849a68c635b33144f4b7ac29cbd734a396a59/src/modules/mc_rate_control/MulticopterRateControl.cpp#L115)
+  - [Verifica se a opção sair esta ativa.](https://github.com/roneydua/PX4-Autopilot/blob/main/src/modules/mc_rate_control/MulticopterRateControl.cpp#L112)
