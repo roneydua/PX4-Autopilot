@@ -110,3 +110,5 @@ src/systemcmds/topic_listener/listener_generated.cpp
 log/
 etc
 .gitignore
+src/modules/mc_rate_control/docs/*
+src/modules/mc_rate_control/Doxyfile

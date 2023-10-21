@@ -50,7 +50,6 @@
 
 using namespace matrix;
 
-
 int SdreControl::print_status() {
   PX4_INFO("Running SDRE control");
   // TODO: print additional runtime information about the state of the module
@@ -153,11 +152,13 @@ SdreControl::SdreControl(bool vtol)
   sdre->update_control();
   PRINT_MAT(sdre->L);
   // local struct
-  nonlinear_sdre_control_s _nonlinear_sdre_torques{};
-  _nonlinear_sdre_torques.torques_body[0] = 10;
-  _nonlinear_sdre_torques.torques_body[1] = 20;
-  _nonlinear_sdre_torques.torques_body[2] = 30;
-  _nonlinear_sdre_torques_pub.publish(_nonlinear_sdre_torques);
+  nonlinear_sdre_control_s _nonlinear_sdre_control{};
+
+  _nonlinear_sdre_control.torques_body[0] = 10;
+  _nonlinear_sdre_control.torques_body[1] = 20;
+  _nonlinear_sdre_control.torques_body[2] = 30;
+
+  _nonlinear_sdre_control_pub.publish(_nonlinear_sdre_control);
 }
 
 /** @copydoc update_states */
@@ -172,17 +173,19 @@ float SdreControl::update_states() {
   // Compute the elapsed time.
   const hrt_abstime now = _vehicle_angular_velocity.timestamp_sample;
   /*! elapsed time.*/
-  const float dt = (now - _last_run) * 1e-6f;
+  const float dt = 0.004f; // (now - _last_run) * 1e-6f;
+
   _last_run = now;
   // copy atual states to drone class
   drone->q = Eigen::Map<Eigen::MatrixXf>(_vehicle_attitude.q, 4, 1);
   drone->w = Eigen::Map<Eigen::MatrixXf>(_vehicle_angular_velocity.xyz, 3, 1);
   drone->update_state_matrices(dt);
   // Publish the thrust setpoint
-  // vehicle_thrust_setpoint.timestamp_sample = _vehicle_angular_velocity.timestamp_sample;
+  // vehicle_thrust_setpoint.timestamp_sample =
+  // _vehicle_angular_velocity.timestamp_sample;
   // vehicle_thrust_setpoint.timestamp = hrt_absolute_time();
   // _vehicle_thrust_setpoint_pub.publish(vehicle_thrust_setpoint);
-
+  // PRINT_MAT(dt);
   return dt;
 }
 
@@ -195,20 +198,25 @@ void SdreControl::update_setpoint_states() {
   _vehicle_attitude_setpoint_sub.update(&_vehicle_attitude_setpoint);
   _vehicle_rates_setpoint_sub.update(&_vehicle_rates_setpoint);
 
-
-  // _vehicle_attitude_setpoint.q_d is calculated by translation control (Loop externo)
+  // _vehicle_attitude_setpoint.q_d is calculated by translation control (Loop
+  // externo)
   q_sp = Eigen::Map<Eigen::MatrixXf>(_vehicle_attitude_setpoint.q_d, 4, 1);
   w_sp(0) = _vehicle_rates_setpoint.roll;
   w_sp(1) = _vehicle_rates_setpoint.pitch;
   w_sp(2) = _vehicle_rates_setpoint.yaw;
   // w_sp(0) = Eigen::Map<Eigen::MatrixXf>(_vehicle_rates_setpoint.xyz, 3, 1);
 
-  _thrust_setpoint = Vector3f(_vehicle_attitude_setpoint.thrust_body);
-  _thrust_setpoint.copyTo(vehicle_thrust_setpoint.xyz);
+  // _thrust_setpoint = Vector3f(_vehicle_attitude_setpoint.thrust_body);
+
+  // _thrust_setpoint.copyTo(vehicle_thrust_setpoint.xyz);
+_vehicle_attitude_setpoint.thrust_body[0]=0.0f;
+  _vehicle_attitude_setpoint.thrust_body[1]=0.0f;
+  _vehicle_attitude_setpoint.thrust_body[2]=0.5f;
+
+  PRINT_MAT(_vehicle_attitude_setpoint.thrust_body[0]);
+  PRINT_MAT(_vehicle_attitude_setpoint.thrust_body[1]);
+  PRINT_MAT(_vehicle_attitude_setpoint.thrust_body[2]);
   _vehicle_thrust_setpoint_pub.publish(vehicle_thrust_setpoint);
-
-
-
 }
 
 void SdreControl::run() {
@@ -218,7 +226,6 @@ void SdreControl::run() {
   px4_pollfd_struct_t fds[1];
   fds[0].fd = sensor_combined_sub;
   fds[0].events = POLLIN;
-
 
   // initialize parameters
   parameters_update(true);
@@ -240,16 +247,15 @@ void SdreControl::run() {
     } else {
       _x << -qe.tail(3), drone->w - w_sp;
     }
-    u = -sdre->L * _x;
+    u = -0*sdre->L * _x;
     // public thrust and torques setpoints
     vehicle_torque_setpoint_s vehicle_torque_setpoint{};
-
-
 
     vehicle_torque_setpoint.xyz[0] = PX4_ISFINITE(u(0)) ? u(0) : 0.f;
     vehicle_torque_setpoint.xyz[1] = PX4_ISFINITE(u(1)) ? u(1) : 0.f;
     vehicle_torque_setpoint.xyz[2] = PX4_ISFINITE(u(2)) ? u(2) : 0.f;
     _vehicle_torque_setpoint_pub.publish(vehicle_torque_setpoint);
+
     // wait for up to 1000ms for data
     int pret = px4_poll(fds, (sizeof(fds) / sizeof(fds[0])), 1000);
 
@@ -265,7 +271,8 @@ void SdreControl::run() {
     } else if (fds[0].revents & POLLIN) {
 
       struct sensor_combined_s sensor_combined;
-      orb_copy(ORB_ID(sensor_combined), sensor_combined_sub, &sensor_combined);
+      orb_copy(ORB_ID(sensor_combined), sensor_combined_sub,
+      &sensor_combined);
       // TODO: do something with the data...
     }
 
@@ -310,8 +317,6 @@ void SdreControl::print_hello(int n) {
     PX4_INFO("ola \n");
   }
 }
-
-
 
 extern "C" __EXPORT int mc_sdre_control_main(int argc, char *argv[]) {
   return SdreControl::main(argc, argv);

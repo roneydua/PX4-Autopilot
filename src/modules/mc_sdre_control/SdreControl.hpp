@@ -143,7 +143,7 @@ private:
 
   // Custom uORB messages
   // uORB::Subscription _nonlinear_sdre_torques_sub{ORB_ID(nonlinear_sdre_torques)};
-  uORB::Publication<nonlinear_sdre_control_s> _nonlinear_sdre_torques_pub{ORB_ID(nonlinear_sdre_torques)};
+  uORB::Publication<nonlinear_sdre_control_s> _nonlinear_sdre_control_pub{ORB_ID(nonlinear_sdre_control)};
 
   float gravidade = 9.80f;
   uint8_t index_alt = 1;
@@ -162,9 +162,9 @@ private:
 
   /*! Rotational control weighting matrix. */
   Eigen::MatrixXf Rr =
-      (Eigen::Vector3f() << 1e4, 1e4, 1e4).finished().asDiagonal();
+      (Eigen::Vector3f() << 1e2, 1e2, 1e2).finished().asDiagonal();
   /*! Rotational states weighting matrix. */
-  Eigen::MatrixXf Qr = (Eigen::VectorXf(6) << 1e2, 1e2, 1e2, 1e1, 1e1, 1e1)
+  Eigen::MatrixXf Qr = (Eigen::VectorXf(6) << 1e1, 1e1, 1e1, 0, 0, 0)
                            .finished()
                            .asDiagonal();
   /* Controles */
