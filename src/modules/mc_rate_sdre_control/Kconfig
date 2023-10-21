@@ -1,12 +1,12 @@
-menuconfig MODULES_MC_RATE_CONTROL
-	bool "mc_rate_control"
+menuconfig MODULES_MC_RATE_SDRE_CONTROL
+	bool "mc_rate_sdre_control"
 	default n
 	---help---
-		Enable support for mc_rate_control
+		Enable support for mc_rate_sdre_control
 
-menuconfig USER_MC_RATE_CONTROL
-	bool "mc_rate_control running as userspace module"
+menuconfig USER_MC_RATE_SDRE_CONTROL
+	bool "mc_rate_sdre_control running as userspace module"
 	default n
-	depends on BOARD_PROTECTED && MODULES_MC_RATE_CONTROL
+	depends on BOARD_PROTECTED && MODULES_MC_RATE_SDRE_CONTROL
 	---help---
-		Put mc_rate_control in userspace memory
+		Put mc_rate_sdre_control in userspace memory

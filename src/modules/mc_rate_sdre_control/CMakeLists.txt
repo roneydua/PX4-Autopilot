@@ -32,16 +32,18 @@
 ############################################################################
 
 px4_add_module(
-	MODULE modules__mc_rate_control
-	MAIN mc_rate_control
+	MODULE modules__mc_rate_sdre_control
+	MAIN mc_rate_sdre_control
 	COMPILE_FLAGS
 		${MAX_CUSTOM_OPT_LEVEL}
 	SRCS
-		MulticopterRateControl.cpp
-		MulticopterRateControl.hpp
+		MulticopterRateSdreControl.cpp
+		MulticopterRateSdreControl.hpp
 	DEPENDS
 		circuit_breaker
 		mathlib
-		RateControl
 		px4_work_queue
+		DRONE 
+		GRUPO_QUAT
+		SDRE
 	)
