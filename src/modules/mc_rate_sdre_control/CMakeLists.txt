@@ -42,8 +42,9 @@ px4_add_module(
 	DEPENDS
 		circuit_breaker
 		mathlib
+		RateControl
 		px4_work_queue
-		DRONE 
-		GRUPO_QUAT
-		SDRE
+		# DRONE
+		# GRUPO_QUAT
+		# SDRE
 	)

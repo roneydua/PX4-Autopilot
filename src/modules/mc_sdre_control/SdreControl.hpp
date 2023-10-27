@@ -66,8 +66,6 @@
 #include <lib/GRUPO_QUAT/GRUPO_QUAT.h>
 #include <lib/DRONE/Drone.h>
 #include <lib/SDRE/Sdre.h>
-// custom topic of controll
-#include <uORB/topics/nonlinear_sdre_control.h>
 using namespace time_literals;
 using namespace ekf;
 // extern "C" __EXPORT int sdre_control_main(int argc, char *argv[]);
@@ -141,9 +139,6 @@ private:
   uORB::Publication<vehicle_torque_setpoint_s> _vehicle_torque_setpoint_pub;
   uORB::Publication<vehicle_thrust_setpoint_s> _vehicle_thrust_setpoint_pub;
 
-  // Custom uORB messages
-  // uORB::Subscription _nonlinear_sdre_torques_sub{ORB_ID(nonlinear_sdre_torques)};
-  uORB::Publication<nonlinear_sdre_control_s> _nonlinear_sdre_control_pub{ORB_ID(nonlinear_sdre_control)};
 
   float gravidade = 9.80f;
   uint8_t index_alt = 1;

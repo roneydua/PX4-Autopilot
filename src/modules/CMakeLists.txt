@@ -1,1 +1,2 @@
 add_subdirectory(mc_sdre_control)
+add_subdirectory(mc_rate_sdre_control)

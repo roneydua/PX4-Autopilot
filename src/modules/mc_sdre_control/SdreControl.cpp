@@ -152,13 +152,7 @@ SdreControl::SdreControl(bool vtol)
   sdre->update_control();
   PRINT_MAT(sdre->L);
   // local struct
-  nonlinear_sdre_control_s _nonlinear_sdre_control{};
 
-  _nonlinear_sdre_control.torques_body[0] = 10;
-  _nonlinear_sdre_control.torques_body[1] = 20;
-  _nonlinear_sdre_control.torques_body[2] = 30;
-
-  _nonlinear_sdre_control_pub.publish(_nonlinear_sdre_control);
 }
 
 /** @copydoc update_states */

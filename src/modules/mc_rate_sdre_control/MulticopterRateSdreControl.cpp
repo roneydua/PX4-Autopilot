@@ -31,7 +31,7 @@
  *
  ****************************************************************************/
 
-#include "MulticopterRateControl.hpp"
+#include "MulticopterRateSdreControl.hpp"
 
 #include <circuit_breaker/circuit_breaker.h>
 #include <drivers/drv_hrt.h>
@@ -43,7 +43,7 @@ using namespace matrix;
 using namespace time_literals;
 using math::radians;
 
-MulticopterRateControl::MulticopterRateControl(bool vtol)
+MulticopterRateSdreControl::MulticopterRateSdreControl(bool vtol)
     : ModuleParams(nullptr),
       WorkItem(MODULE_NAME, px4::wq_configurations::rate_ctrl),
       _vehicle_torque_setpoint_pub(
@@ -59,9 +59,9 @@ MulticopterRateControl::MulticopterRateControl(bool vtol)
   _controller_status_pub.advertise();
 }
 
-MulticopterRateControl::~MulticopterRateControl() { perf_free(_loop_perf); }
+MulticopterRateSdreControl::~MulticopterRateSdreControl() { perf_free(_loop_perf); }
 
-bool MulticopterRateControl::init() {
+bool MulticopterRateSdreControl::init() {
   if (!_vehicle_angular_velocity_sub.registerCallback()) {
     PX4_ERR("callback registration failed");
     return false;
@@ -70,7 +70,7 @@ bool MulticopterRateControl::init() {
   return true;
 }
 
-void MulticopterRateControl::parameters_updated() {
+void MulticopterRateSdreControl::parameters_updated() {
   // rate control parameters
   // The controller gain K is used to convert the parallel (P + I/s + sD) form
   // to the ideal (K * [1 + 1/sTi + sTd]) form
@@ -102,7 +102,7 @@ void MulticopterRateControl::parameters_updated() {
                             radians(_param_mc_acro_y_max.get()));
 }
 
-void MulticopterRateControl::Run() {
+void MulticopterRateSdreControl::Run() {
   if (should_exit()) {
     _vehicle_angular_velocity_sub.unregisterCallback();
     exit_and_cleanup();
@@ -296,7 +296,7 @@ void MulticopterRateControl::Run() {
   perf_end(_loop_perf);
 }
 
-void MulticopterRateControl::updateActuatorControlsStatus(
+void MulticopterRateSdreControl::updateActuatorControlsStatus(
     const vehicle_torque_setpoint_s &vehicle_torque_setpoint, float dt) {
   for (int i = 0; i < 3; i++) {
     _control_energy[i] +=
@@ -320,7 +320,7 @@ void MulticopterRateControl::updateActuatorControlsStatus(
   }
 }
 
-int MulticopterRateControl::task_spawn(int argc, char *argv[]) {
+int MulticopterRateSdreControl::task_spawn(int argc, char *argv[]) {
   bool vtol = false;
 
   if (argc > 1) {
@@ -329,7 +329,7 @@ int MulticopterRateControl::task_spawn(int argc, char *argv[]) {
     }
   }
 
-  MulticopterRateControl *instance = new MulticopterRateControl(vtol);
+  MulticopterRateSdreControl *instance = new MulticopterRateSdreControl(vtol);
 
   if (instance) {
     _object.store(instance);
@@ -350,11 +350,11 @@ int MulticopterRateControl::task_spawn(int argc, char *argv[]) {
   return PX4_ERROR;
 }
 
-int MulticopterRateControl::custom_command(int argc, char *argv[]) {
+int MulticopterRateSdreControl::custom_command(int argc, char *argv[]) {
   return print_usage("unknown command");
 }
 
-int MulticopterRateControl::print_usage(const char *reason) {
+int MulticopterRateSdreControl::print_usage(const char *reason) {
   if (reason) {
     PX4_WARN("%s\n", reason);
   }
@@ -362,14 +362,14 @@ int MulticopterRateControl::print_usage(const char *reason) {
   PRINT_MODULE_DESCRIPTION(
       R"DESCR_STR(
 ### Description
-This implements the multicopter rate controller. It takes rate setpoints (in acro mode
+This implements the multicopter rate SDRE controller. It takes rate setpoints (in acro mode
 via `manual_control_setpoint` topic) as inputs and outputs actuator control messages.
 
 The controller has a PID loop for angular rate error.
 
 )DESCR_STR");
 
-  PRINT_MODULE_USAGE_NAME("mc_rate_control", "controller");
+  PRINT_MODULE_USAGE_NAME("mc_rate_sdre_control", "controller");
   PRINT_MODULE_USAGE_COMMAND("start");
   PRINT_MODULE_USAGE_ARG("vtol", "VTOL mode", true);
   PRINT_MODULE_USAGE_DEFAULT_COMMANDS();
@@ -377,6 +377,6 @@ The controller has a PID loop for angular rate error.
   return 0;
 }
 
-extern "C" __EXPORT int mc_rate_control_main(int argc, char *argv[]) {
-  return MulticopterRateControl::main(argc, argv);
+extern "C" __EXPORT int mc_rate_sdre_control_main(int argc, char *argv[]) {
+  return MulticopterRateSdreControl::main(argc, argv);
 }

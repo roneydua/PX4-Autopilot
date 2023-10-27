@@ -62,12 +62,12 @@
 
 using namespace time_literals;
 
-class MulticopterRateControl : public ModuleBase<MulticopterRateControl>,
+class MulticopterRateSdreControl : public ModuleBase<MulticopterRateSdreControl>,
                                public ModuleParams,
                                public px4::WorkItem {
 public:
-  MulticopterRateControl(bool vtol = false);
-  ~MulticopterRateControl() override;
+  MulticopterRateSdreControl(bool vtol = false);
+  ~MulticopterRateSdreControl() override;
 
   /** @see ModuleBase */
   static int task_spawn(int argc, char *argv[]);

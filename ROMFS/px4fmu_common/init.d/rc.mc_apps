@@ -58,8 +58,8 @@ control_allocator start
 #
 # Start Multicopter Rate Controller.
 #
-mc_rate_control start
-
+# mc_rate_control start
+mc_rate_sdre_control start
 #
 # Start Multicopter Attitude Controller.
 #
